@@ -4,6 +4,11 @@ These are my personal notes for system design interview preparation. I use this 
 
 This is a study log, not an authoritative reference. Notes may be incomplete or contain mistakes, and they reflect my own understanding at the time of writing.
 
+## Start here
+
+- [`ROADMAP.md`](ROADMAP.md): phases, exit criteria, and what to study next
+- [`DEPTH-GUIDE.md`](DEPTH-GUIDE.md): how deep to go on each component, and when to stop
+
 ## Structure
 
 | Folder | What goes there |
@@ -15,7 +20,7 @@ This is a study log, not an authoritative reference. Notes may be incomplete or 
 
 ## How I use it
 
-1. Study a fundamentals topic and write it up in my own words.
+1. Follow the current phase in the roadmap. Study a fundamentals topic and write it up in my own words.
 2. Pick a problem, solve it on paper under a time limit, then write the clean version using [`templates/problem-template.md`](templates/problem-template.md).
 3. Run a mock interview and log it using [`templates/mock-interview-template.md`](templates/mock-interview-template.md).
 4. Revisit weak spots that show up in mock feedback.
