@@ -23,3 +23,7 @@ This is a study log, not an authoritative reference. Notes may be incomplete or 
 ## Built with AI
 
 I write and organize these notes together with [Claude Code](https://claude.com/claude-code), Anthropic's agentic coding tool, running **Claude Opus 5.5** (`claude-opus-5-5`). Claude helps me set up the repo, explain concepts, draft and review write-ups, and act as the interviewer in mock sessions. The study, the practice, and the final judgment on what goes into these notes are mine.
+
+## License
+
+[MIT](LICENSE). Feel free to use, copy, and adapt anything here.
