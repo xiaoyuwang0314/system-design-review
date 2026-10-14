@@ -92,9 +92,9 @@ These are rules of thumb. Real numbers vary a lot with the workload, so state th
 2. **Round aggressively.** 86,400 becomes 10^5. 3.65 becomes 4 if it helps.
 3. **Compute only what drives decisions.** Usually QPS (read and write), storage, and sometimes bandwidth or cache size.
 4. **Sanity-check.** Does the number look reasonable compared with a known system?
-5. **State the implication.** "20,000 read QPS is too much for one database, so I will add a cache."
+5. **State the implication.** Compare each number with the per-machine capacity table above. The gap tells you what to do: "20,000 read QPS is too much for one database, so I will add a cache."
 
-## Worked example: URL shortener
+## Worked example 1: URL shortener (read-heavy)
 
 Assumptions:
 - 100 million new short URLs per day
@@ -116,11 +116,47 @@ Implications:
 - **Storage grows to hundreds of TB**, so the database must be sharded eventually. The access pattern is a simple lookup by key, so a key-value store fits well.
 - **Write QPS is moderate**, so short code generation does not need an exotic design.
 
+## Worked example 2: Chat app (write-heavy)
+
+Assumptions:
+- 500 million DAU
+- 40 messages sent per user per day
+- 100 B per message, including metadata
+- Keep messages for 5 years
+- About 10% of DAU online at any moment, each holding one WebSocket connection
+- One server holds about 100,000 connections
+
+| Quantity | Calculation | Result |
+| --- | --- | --- |
+| Messages per day | 5 x 10^8 x 40 | 2 x 10^10 |
+| Write QPS | 2 x 10^10 / 10^5 | 2 x 10^5 (peak about 6 x 10^5) |
+| Storage per day | 2 x 10^10 x 100 B | 2 TB |
+| Storage for 5 years | 2 TB x 365 x 5 | about 3.65 PB (about 11 PB with 3 replicas) |
+| Concurrent connections | 5 x 10^8 x 10% | 5 x 10^7 |
+| Connection servers | 5 x 10^7 / 10^5 | 500 (deploy more for evening peaks and failover) |
+
+Compare with single-machine capacity:
+
+| | Needed | One relational database | Gap |
+| --- | --- | --- | --- |
+| Writes | 6 x 10^5 per second at peak | 10^3 to 10^4 per second | 60 to 600 times |
+| Storage | about 11 PB | a few TB to tens of TB | 1,000 times or more |
+
+Implications:
+- **One database cannot hold this.** The data must be sharded across many machines.
+- **The access pattern decides the store.** Writes append a message to a conversation, and reads fetch the latest N messages of one conversation. There are no joins or cross-conversation transactions. A wide-column store such as Cassandra or HBase fits: LSM-tree storage makes writes cheap, and it scales horizontally with built-in sharding and replication.
+- **Partition by `conversation_id`, cluster by `message_id`.** All messages of one conversation live in one partition, sorted by time, so "latest 50 messages" is a single range scan. Partitioning by sender `user_id` would instead scatter a conversation across every participant's partition, so each read would have to query many partitions and merge the results (scatter-gather).
+- **Storage, not QPS, drives the node count.** At about 20,000 writes per second per node, writes need about 30 nodes. At about 10 TB per node, storage needs about 1,100 nodes. This suggests tiering: keep recent messages in the hot store and move old ones to cheaper cold storage such as object storage.
+
+Rule worth remembering: **choose the partition key based on the most common read.**
+
 ## Common mistakes
 
 - Spending more than a few minutes, or chasing precise numbers
 - Forgetting peak traffic
 - Forgetting replication when estimating storage
+- Going from per-day to multi-year totals without multiplying by 365. I made this mistake in the chat app example and was off by more than 100 times
+- Stopping at the numbers without comparing them with single-machine capacity, which is where the design decision comes from
 - Computing numbers but never saying what they mean for the design
 - Silent assumptions. The interviewer cannot correct an assumption they never heard
 
