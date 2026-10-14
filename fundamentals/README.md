@@ -3,7 +3,7 @@
 Core concepts that show up across most system design interviews. One file per topic. Check a box once the topic has a write-up I am happy with.
 
 ## Foundations
-- [ ] Back-of-the-envelope estimation (QPS, storage, bandwidth, latency numbers)
+- [ ] [Back-of-the-envelope estimation](back-of-the-envelope-estimation.md) (QPS, storage, bandwidth, latency numbers)
 - [ ] Scalability: vertical vs. horizontal scaling
 - [ ] Availability, reliability, and SLAs
 - [ ] CAP theorem and PACELC
