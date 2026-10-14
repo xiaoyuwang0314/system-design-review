@@ -30,6 +30,8 @@ Example for a URL shortener:
 | Database | L1 | Simple access pattern, so a key-value store is enough |
 | ZooKeeper consensus internals | Too deep | Knowing Raft details would not change any design decision here |
 
+This table shows the full range of levels for illustration. Under the mid-level target in section 4, a write-up picks one of these components as its main deep dive.
+
 ## 3. The stop test
 
 Before going one level deeper, ask:
@@ -38,14 +40,25 @@ Before going one level deeper, ask:
 
 If not, stop. Put the topic in the **Parked** section of the write-up and move on.
 
-## 4. Hard limits
+## 4. Target bar: mid-level
 
-- **Two or three deep dives per problem.** Each should fit in about five minutes of speaking, which matches the time available in a real 45-minute interview.
+I am preparing for new grad interviews in general, and I target the mid-level bar as a safety margin. See [`research/ng-interview-landscape-2026.md`](research/ng-interview-landscape-2026.md) for the reasoning.
+
+| | What that means for each write-up |
+| --- | --- |
+| Requirements | Clarify functional and non-functional requirements before drawing anything |
+| Estimation | Quick and rough, a few lines. NG interviews rarely weigh it heavily |
+| Design | Cover both the read path and the write path, plus basic failure handling |
+| Deep dives | **One** component at L2 per problem. A second one only if it is clearly tied to the core challenge |
+| Trade-offs | Justify every main choice, and name at least one alternative |
+
+## 5. Hard limits
+
+- **Each deep dive fits in about five minutes of speaking.**
 - **A fundamentals topic is done** when I can explain it in two minutes and answer three follow-up questions. Anything beyond that goes to Parked.
 
-## 5. New grad calibration
+## 6. Default levels by topic group
 
-For new grad interviews, the bar is a clear requirements discussion, a reasonable high-level design, and sensible trade-offs. Interviewers rarely expect L3 on distributed systems internals.
-
-- Foundations and Data topics: aim for L2.
-- Distributed Systems topics (consensus, distributed transactions, clocks): L1 is enough by default. Go to L2 only after the rest of the roadmap is solid.
+- Foundations, Networking, and Data topics: L2.
+- Message queues and event streaming: L2, since many practical designs (log ingestion, notifications, pub/sub) depend on them.
+- Other Distributed Systems topics (consensus, distributed transactions, clocks): L1. Go to L2 only after the rest of the roadmap is solid.

@@ -38,7 +38,7 @@ Diagram and walkthrough of the main request flows.
 | Component | Level (L1 / L2 / L3) | Reason |
 | --- | --- | --- |
 
-Pick two or three components tied to the core challenge and go deeper (scaling, bottlenecks, failure handling).
+Pick one component tied to the core challenge and take it to L2 (how it works, failure handling, follow-ups). Add a second only if it is clearly part of the core challenge.
 
 ## 7. Trade-offs and Alternatives
 | Decision | Chosen | Alternative | Why |

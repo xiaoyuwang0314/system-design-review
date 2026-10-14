@@ -1,8 +1,10 @@
 # Roadmap
 
-I am a new grad with no interview scheduled yet. The goal is to reach a level where I can handle a system design round at any time, then stay there with light, regular practice.
+I am a new grad preparing for NG interviews in general, with no specific interview scheduled. The goal is to reach a level where I can handle a design round at any time, then stay there with light, regular practice.
 
-The roadmap is organized by phases instead of dates. I move to the next phase only after meeting its exit criteria. Mock feedback decides what to revisit. Depth targets follow [`DEPTH-GUIDE.md`](DEPTH-GUIDE.md).
+I target the mid-level bar as a safety margin above NG expectations. The reasoning, based on interview reports from the past year, is in [`research/ng-interview-landscape-2026.md`](research/ng-interview-landscape-2026.md). Depth targets follow [`DEPTH-GUIDE.md`](DEPTH-GUIDE.md).
+
+The roadmap is organized by phases instead of dates. I move to the next phase only after meeting its exit criteria. Mock feedback decides what to revisit.
 
 ## Phase 1: Foundations
 
@@ -16,7 +18,7 @@ Build the vocabulary and reasoning that every problem relies on.
 - [ ] SQL vs. NoSQL and how to choose
 
 **Exit criteria**
-- [ ] Given a prompt, produce QPS, storage, and bandwidth estimates in five minutes
+- [ ] Given a prompt, produce rough QPS and storage estimates in a few minutes
 - [ ] Explain CAP and the main consistency models in two minutes each, with a real system as an example
 
 ## Phase 2: Building blocks and warm-up problems
@@ -51,10 +53,13 @@ Practice the patterns that appear most often, under time pressure.
 | Review caching and replication | Distributed cache |
 | Review message queues | Distributed message queue |
 
+Mix in the Component and API Design problems from [`problems/README.md`](problems/README.md) along the way. They are short, so one can fit between two Core problems. In-memory pub/sub and log ingestion fit well right after message queues.
+
 Run a mock about every two problems.
 
 **Exit criteria**
 - [ ] Pass a 45-minute mock on a Core problem I have not practiced before
+- [ ] Pass a mock on a Component and API Design problem I have not practiced before
 - [ ] For every Core problem, state the core challenge and the main trade-off from memory
 
 ## Phase 4: Stay ready

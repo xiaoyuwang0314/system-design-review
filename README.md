@@ -8,13 +8,19 @@ This is a study log, not an authoritative reference. Notes may be incomplete or 
 
 - [`ROADMAP.md`](ROADMAP.md): phases, exit criteria, and what to study next
 - [`DEPTH-GUIDE.md`](DEPTH-GUIDE.md): how deep to go on each component, and when to stop
+- [`research/ng-interview-landscape-2026.md`](research/ng-interview-landscape-2026.md): what new grad interview loops looked like from Oct 2025 to Oct 2026, and why this repo has its current scope
+
+## Scope
+
+This repo covers distributed system design and component / API design, targeting the mid-level bar as preparation for new grad interviews. Object-oriented design is studied in a separate project because it involves running code. AI-assisted coding and project deep dives are out of scope for now.
 
 ## Structure
 
 | Folder | What goes there |
 | --- | --- |
 | [`fundamentals/`](fundamentals/) | Core building blocks: scalability, caching, databases, replication, sharding, consistency, messaging, and so on |
-| [`problems/`](problems/) | Worked solutions to classic design questions, one file per problem |
+| [`problems/`](problems/) | Worked solutions to classic design questions and component / API design problems, one file per problem |
+| [`research/`](research/) | Research on interview formats that informs the scope and depth of these notes |
 | [`mock-interviews/`](mock-interviews/) | Logs of practice sessions: the prompt, what I did, feedback, and what to fix next time |
 | [`templates/`](templates/) | Reusable templates for writing up problems and mock sessions |
 
