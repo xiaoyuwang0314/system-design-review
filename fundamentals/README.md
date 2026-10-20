@@ -6,8 +6,8 @@ Core concepts that show up across most system design interviews. One file per to
 - [ ] [Back-of-the-envelope estimation](back-of-the-envelope-estimation.md) (QPS, storage, bandwidth, latency numbers)
 - [ ] [Scalability: vertical vs. horizontal scaling](scalability.md)
 - [ ] [Availability, reliability, and SLAs](availability-reliability-sla.md)
-- [ ] CAP theorem and PACELC
-- [ ] Consistency models (strong, eventual, causal, read-your-writes)
+- [ ] [CAP theorem and PACELC](cap-theorem-pacelc.md)
+- [ ] [Consistency models](consistency-models.md) (strong, eventual, causal, read-your-writes)
 
 ## Networking and Traffic
 - [ ] DNS
