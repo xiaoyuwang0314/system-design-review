@@ -18,7 +18,7 @@ Core concepts that show up across most system design interviews. One file per to
 - [ ] Rate limiting
 
 ## Data
-- [ ] SQL vs. NoSQL and how to choose
+- [ ] [SQL vs. NoSQL and how to choose](sql-vs-nosql.md)
 - [ ] Indexing (B-tree, LSM tree, inverted index)
 - [ ] Replication (leader-follower, multi-leader, leaderless)
 - [ ] Sharding and partitioning
