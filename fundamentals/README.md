@@ -11,7 +11,7 @@ Core concepts that show up across most system design interviews. One file per to
 
 ## Networking and Traffic
 - [ ] DNS
-- [ ] Load balancing (L4 vs. L7, algorithms, health checks)
+- [ ] [Load balancing](load-balancing.md) (L4 vs. L7, algorithms, health checks)
 - [ ] CDN
 - [ ] API design (REST, gRPC, GraphQL, pagination, idempotency)
 - [ ] Real-time communication (polling, long polling, WebSocket, SSE)
