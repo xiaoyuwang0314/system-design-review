@@ -3,11 +3,11 @@
 Core concepts that show up across most system design interviews. One file per topic. Check a box once the topic has a write-up I am happy with.
 
 ## Foundations
-- [ ] [Back-of-the-envelope estimation](back-of-the-envelope-estimation.md) (QPS, storage, bandwidth, latency numbers)
-- [ ] [Scalability: vertical vs. horizontal scaling](scalability.md)
-- [ ] [Availability, reliability, and SLAs](availability-reliability-sla.md)
-- [ ] [CAP theorem and PACELC](cap-theorem-pacelc.md)
-- [ ] [Consistency models](consistency-models.md) (strong, eventual, causal, read-your-writes)
+- [x] [Back-of-the-envelope estimation](back-of-the-envelope-estimation.md) (QPS, storage, bandwidth, latency numbers)
+- [x] [Scalability: vertical vs. horizontal scaling](scalability.md)
+- [x] [Availability, reliability, and SLAs](availability-reliability-sla.md)
+- [x] [CAP theorem and PACELC](cap-theorem-pacelc.md)
+- [x] [Consistency models](consistency-models.md) (strong, eventual, causal, read-your-writes)
 
 ## Networking and Traffic
 - [ ] DNS
@@ -18,7 +18,7 @@ Core concepts that show up across most system design interviews. One file per to
 - [ ] Rate limiting
 
 ## Data
-- [ ] [SQL vs. NoSQL and how to choose](sql-vs-nosql.md)
+- [x] [SQL vs. NoSQL and how to choose](sql-vs-nosql.md)
 - [ ] Indexing (B-tree, LSM tree, inverted index)
 - [ ] Replication (leader-follower, multi-leader, leaderless)
 - [ ] Sharding and partitioning
