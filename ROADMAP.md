@@ -10,12 +10,12 @@ The roadmap is organized by phases instead of dates. I move to the next phase on
 
 Build the vocabulary and reasoning that every problem relies on.
 
-- [ ] Back-of-the-envelope estimation
-- [ ] Scalability: vertical vs. horizontal scaling
-- [ ] Availability, reliability, and SLAs
-- [ ] CAP theorem and PACELC
-- [ ] Consistency models
-- [ ] SQL vs. NoSQL and how to choose
+- [x] Back-of-the-envelope estimation
+- [x] Scalability: vertical vs. horizontal scaling
+- [x] Availability, reliability, and SLAs
+- [x] CAP theorem and PACELC
+- [x] Consistency models
+- [x] SQL vs. NoSQL and how to choose
 
 **Exit criteria**
 - [ ] Given a prompt, produce rough QPS and storage estimates in a few minutes
