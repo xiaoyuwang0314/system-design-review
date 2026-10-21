@@ -24,7 +24,7 @@ Core concepts that show up across most system design interviews. One file per to
 - [ ] Sharding and partitioning
 - [ ] Consistent hashing
 - [ ] Transactions and isolation levels
-- [ ] Caching (strategies, eviction, invalidation, cache stampede)
+- [ ] [Caching](caching.md) (strategies, eviction, invalidation, cache stampede)
 - [ ] Blob and object storage
 
 ## Distributed Systems
