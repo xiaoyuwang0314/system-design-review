@@ -2,6 +2,8 @@
 
 A URL shortener maps a short code to a long URL. Visiting `short.ly/abc1234` redirects the browser to the long URL. Each link is created once and clicked many times, so the system is read-heavy.
 
+Slides for teaching this problem: [`url-shortener-slides.html`](url-shortener-slides.html) (open the file in a browser; use the arrow keys to move between slides).
+
 Why the product exists: links fit where length is limited (SMS, social posts, QR codes, print), every click passes through the service so it can count clicks (the main business value), and the destination can be changed without reprinting. Companies also run branded shorteners (`amzn.to`, `youtu.be`).
 
 ## Core Challenge
@@ -179,6 +181,27 @@ Rule: **skipping IDs is harmless, reusing them is not.**
 **When to reconsider**: option C is a valid alternative. After 10 years the code space is about 10% full, so a random code collides about 10% of the time and needs about 1.1 attempts on average. It is simpler to run (no counter service), and interviewers accept it if the collision math is stated. Hello Interview rates the hash with salted retry, which behaves the same way, as a great solution too.
 
 **Why not Snowflake IDs?** They are 64-bit, about 11 base62 characters, which is too long for a short link.
+
+### Worked example: three requests
+
+Setup: two write servers, A and B. The Redis counter starts at `999`, and neither server holds any IDs yet. Codes below are real outputs of the transformation (multiply by a fixed secret number, mod 62^7, then base62 with the alphabet `0-9a-zA-Z`).
+
+| Request | Server | Redis call | ID | Plain base62 | Returned |
+| --- | --- | --- | --- | --- | --- |
+| Alice: `https://blog.example.com/my-trip-to-japan` | A | `INCRBY counter 1000` returns 1999, so A owns 1000 to 1999 | 1000 | `00000g8` | `201`, `short.ly/26Ess0E` |
+| Bob: `https://shop.example.com/products/blue-sneakers` | A | None, A uses its own batch | 1001 | `00000g9` | `201`, `short.ly/EqngklJ` |
+| Carol: `https://events.example.com/signup?id=8841` | B | `INCRBY counter 1000` returns 2999, so B owns 2000 to 2999 | 2000 | `00000wg` | `201`, `short.ly/4diUU1i` |
+
+Each request: take the next ID, transform it, base62-encode it, do a conditional write, return `201`.
+
+What it shows:
+- **No collisions**: A and B hold ranges that never overlap.
+- **Batching**: three requests needed only two Redis calls. Bob's never touched Redis.
+- **Not guessable**: plain codes `00000g8` and `00000g9` differ by one character. Transformed codes `26Ess0E` and `EqngklJ` look unrelated.
+
+End state: Redis counter at `2999`. Server A has 1002 to 1999 left, server B has 2001 to 2999 left.
+
+Then someone opens `short.ly/26Ess0E`: the redirect service misses in Redis (the link is brand new), reads the row from the database, fills the cache, and returns `302` with `Location: https://blog.example.com/my-trip-to-japan`. The next click on the same link is a cache hit and never touches the database.
 
 ### Estimates used
 

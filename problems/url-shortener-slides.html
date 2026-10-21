@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Designing a URL Shortener</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a vertical stack of 16:9 slides on a cool desk surface, read like a deck, scrolled like a page */
+:root {
+  --bg: #EEF1F5;
+  --slide: #FFFFFF;
+  --ink: #142033;
+  --muted: #5A6678;
+  --line: #C9D1DC;
+  --accent: #2F4BD8;
+  --accent-soft: #E3E8FB;
+  --mark: #B97A0B;
+  --mark-soft: #FCF0D6;
+  --ok: #1E7F53;
+  --bad: #B83A33;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E141C; --slide: #151D28; --ink: #E6EBF2; --muted: #9AA6B6; --line: #2E3A4A;
+    --accent: #8AA0FF; --accent-soft: #1F2A4D; --mark: #F2B33D; --mark-soft: #3A2E14;
+    --ok: #4CC38A; --bad: #F07A72; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E141C; --slide: #151D28; --ink: #E6EBF2; --muted: #9AA6B6; --line: #2E3A4A;
+  --accent: #8AA0FF; --accent-soft: #1F2A4D; --mark: #F2B33D; --mark-soft: #3A2E14;
+  --ok: #4CC38A; --bad: #F07A72; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 96px;
+}
+.deck { display: flex; flex-direction: column; gap: 28px; max-width: 1120px; margin: 0 auto; }
+
+.slide {
+  background: var(--slide);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(20px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scroll-margin-top: 16px;
+  min-width: 0;
+}
+@media (min-width: 900px) { .slide { aspect-ratio: 16 / 9; overflow: hidden; } }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.eyebrow .num { color: var(--muted); }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(34px, 6vw, 64px); font-weight: 800; line-height: 1.02; }
+h2 { font-size: clamp(24px, 3.2vw, 36px); font-weight: 800; line-height: 1.1; }
+h3 { font-family: var(--font-body); font-size: 15px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
+p { margin: 0; max-width: 65ch; }
+.lede { font-size: clamp(16px, 1.6vw, 19px); color: var(--muted); }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+.hl { background: var(--mark-soft); color: var(--ink); padding: 0 4px; border-radius: 3px; }
+.accent { color: var(--accent); }
+.muted { color: var(--muted); }
+
+.grid { display: grid; gap: 18px; flex: 1; min-height: 0; }
+.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 760px) { .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; } }
+
+.panel { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.panel.tint { background: var(--accent-soft); border-color: transparent; }
+.panel.warm { background: var(--mark-soft); border-color: transparent; }
+ul, ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+li { max-width: 62ch; }
+
+.say {
+  border-left: 3px solid var(--accent);
+  padding: 8px 0 8px 16px;
+  font-size: 15.5px;
+  color: var(--ink);
+  max-width: 75ch;
+}
+.say::before { content: "Say it: "; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+
+.table-wrap { overflow-x: auto; min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+tr.pick td { background: var(--accent-soft); }
+
+.http {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+  line-height: 1.55;
+}
+.http .m { color: var(--accent); font-weight: 500; }
+.http .s { color: var(--ok); }
+.http .e { color: var(--bad); }
+
+/* Title slide */
+.title-slide { justify-content: space-between; }
+.url-demo { display: flex; flex-direction: column; gap: 10px; font-family: var(--font-mono); }
+.url-bar { border: 1px solid var(--line); border-radius: 999px; padding: 10px 18px; background: var(--bg); overflow-x: auto; white-space: nowrap; font-size: 14px; color: var(--muted); }
+.url-bar.short { font-size: clamp(20px, 3vw, 30px); color: var(--ink); border-color: var(--accent); background: var(--slide); width: fit-content; max-width: 100%; }
+.url-bar.short b { color: var(--accent); font-weight: 500; }
+.arrow-label { font-size: 13px; color: var(--muted); padding-left: 18px; }
+
+/* Steps sequence */
+.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.step { border-top: 4px solid var(--accent); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.step .n { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.step .t { font-weight: 600; }
+.step .min { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
+.step.later { border-top-color: var(--line); }
+
+/* Diagrams */
+.diagram { overflow-x: auto; min-width: 0; flex: 1; display: flex; align-items: center; }
+.diagram svg { width: 100%; min-width: 640px; height: auto; color: var(--muted); }
+.diagram .box { fill: var(--slide); stroke: var(--line); stroke-width: 1.5; }
+.diagram .box.hot { fill: var(--accent-soft); stroke: var(--accent); }
+.diagram .box.store { fill: var(--mark-soft); stroke: var(--mark); }
+.diagram text { fill: var(--ink); font-family: var(--font-body); font-size: 14px; }
+.diagram text.sub { fill: var(--muted); font-size: 11.5px; font-family: var(--font-mono); }
+.diagram text.edge { fill: var(--muted); font-size: 11px; font-family: var(--font-mono); }
+.diagram .wire { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.diagram .wire.dash { stroke-dasharray: 5 4; }
+
+/* Bars drawn to one scale */
+.bars { display: flex; flex-direction: column; gap: 12px; }
+.bar-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 120px; gap: 12px; align-items: center; font-size: 14px; }
+@media (max-width: 560px) { .bar-row { grid-template-columns: 1fr; gap: 4px; } }
+.bar-track { height: 18px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+.bar-fill.need { background: var(--mark); }
+.bar-val { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Counter batching ranges */
+.ranges { display: flex; flex-direction: column; gap: 10px; font-family: var(--font-mono); font-size: 13.5px; }
+.range { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; align-items: center; }
+.range .seg { padding: 6px 10px; border-radius: 6px; background: var(--accent-soft); color: var(--ink); overflow-x: auto; white-space: nowrap; }
+.range .seg.used { background: var(--mark-soft); }
+
+.codes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 14px; font-family: var(--font-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.codes .h { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.rule { font-family: var(--font-display); font-weight: 800; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.2; }
+
+/* Nav */
+.nav {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 6px;
+  background: var(--slide);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  box-shadow: 0 6px 20px rgba(10, 20, 40, 0.12);
+}
+.nav button {
+  font: inherit; color: var(--ink); background: transparent; border: 0; border-radius: 999px;
+  width: 34px; height: 34px; cursor: pointer;
+}
+.nav button:hover { background: var(--accent-soft); }
+.nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.nav .count { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); }
+.hint { text-align: center; color: var(--muted); font-size: 13px; font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<main class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide title-slide" id="s1">
+  <div class="eyebrow"><span>System design walkthrough · warm-up problem</span><span class="num">01</span></div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <h1>Designing a<br>URL Shortener</h1>
+    <p class="lede">How bit.ly turns a long link into seven characters, and how to explain the design in a 45-minute interview.</p>
+  </div>
+  <div class="url-demo" aria-label="Example: a long URL becomes a short one">
+    <div class="url-bar">https://www.example.com/articles/2026/10/how-to-prepare-for-system-design-interviews?utm_source=newsletter</div>
+    <div class="arrow-label">↓ POST /v1/urls &nbsp;·&nbsp; then every click: GET /abc1234 → 302</div>
+    <div class="url-bar short">short.ly/<b>abc1234</b></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="s2">
+  <div class="eyebrow"><span>The product</span><span class="num">02</span></div>
+  <h2>Two features, and four reasons people pay for them</h2>
+  <div class="grid cols-2">
+    <div class="panel tint">
+      <h3>What it does</h3>
+      <ol>
+        <li><b>Create</b>: take a long URL, return a short code like <code>abc1234</code>, store the mapping.</li>
+        <li><b>Redirect</b>: when someone opens <code>short.ly/abc1234</code>, look up the long URL and send the browser there with an HTTP redirect.</li>
+      </ol>
+      <p class="muted" style="margin-top:auto">A link is created once and clicked many times. This is a <b>read-heavy</b> system.</p>
+    </div>
+    <div class="panel">
+      <h3>Why it exists</h3>
+      <ul>
+        <li><b>Length limits</b>: SMS, social posts, printed flyers, QR codes. Shorter URL, simpler QR code.</li>
+        <li><b>Click analytics</b>: every click passes through the service, so it can count clicks by time, country and device. This is the main business value.</li>
+        <li><b>Change the destination later</b> without reprinting a QR code on 100,000 boxes.</li>
+        <li><b>Branded links</b>: <code>amzn.to</code>, <code>youtu.be</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" id="s3">
+  <div class="eyebrow"><span>The interview framework</span><span class="num">03</span></div>
+  <h2>Follow the same order every time</h2>
+  <p class="lede">This order follows Hello Interview's delivery framework. Estimation is not its own step: do the math when a number changes a decision.</p>
+  <div class="steps" role="list">
+    <div class="step" role="listitem"><span class="n">Step 1</span><span class="t">Requirements</span><span class="min">~5 min</span><span class="muted">Functional, non-functional, out of scope</span></div>
+    <div class="step" role="listitem"><span class="n">Step 2</span><span class="t">Core entities</span><span class="min">~2 min</span><span class="muted">The main nouns</span></div>
+    <div class="step" role="listitem"><span class="n">Step 3</span><span class="t">API</span><span class="min">~5 min</span><span class="muted">Core endpoints only</span></div>
+    <div class="step" role="listitem"><span class="n">Step 4</span><span class="t">High-level design</span><span class="min">10 to 15 min</span><span class="muted">One flow per requirement</span></div>
+    <div class="step" role="listitem"><span class="n">Step 5</span><span class="t">Deep dive</span><span class="min">~10 min</span><span class="muted">The core challenge</span></div>
+    <div class="step later" role="listitem"><span class="n">Wrap-up</span><span class="t">Trade-offs, follow-ups</span><span class="min">remaining</span><span class="muted">What you'd change and why</span></div>
+  </div>
+  <div class="panel warm" style="margin-top:auto">
+    <h3>Core challenge for this problem</h3>
+    <p>Generate short codes that are <b>unique</b> and <b>hard to guess</b> at scale, and serve a read-heavy redirect workload with <b>low latency</b> and <b>high availability</b>.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" id="s4">
+  <div class="eyebrow"><span>Step 1 · Requirements</span><span class="num">04</span></div>
+  <h2>Ask, assume, then confirm</h2>
+  <div class="grid cols-3">
+    <div class="panel">
+      <h3>Functional</h3>
+      <ol>
+        <li>Long URL in, unique short URL out</li>
+        <li>Short URL redirects to the long URL</li>
+        <li>Optional custom alias</li>
+        <li>Optional expiration time</li>
+      </ol>
+      <p class="muted">Click counts: nice to have.</p>
+    </div>
+    <div class="panel tint">
+      <h3>Non-functional</h3>
+      <ul>
+        <li><b>Scale</b>: 100M new URLs a day, 10 reads per write</li>
+        <li><b>Low latency</b> on redirects</li>
+        <li><b>Availability over consistency</b> for redirects</li>
+        <li><b>Uniqueness</b>: never two URLs on one code</li>
+        <li><b>Durability</b>: links last for years</li>
+        <li><b>Hard to guess</b>: no enumerating links</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Out of scope</h3>
+      <ul>
+        <li>User accounts</li>
+        <li>Editing a destination</li>
+        <li>Malware detection</li>
+      </ul>
+      <p class="muted">Saying this out loud shows you control the scope on purpose.</p>
+    </div>
+  </div>
+  <p class="say">"I'll favor availability for redirects. If redirects go down, every link ever shared breaks. A new link taking a second to show up everywhere is fine."</p>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="s5">
+  <div class="eyebrow"><span>Steps 2 & 3 · Core entities and API</span><span class="num">05</span></div>
+  <h2>Core entities and the two API endpoints</h2>
+  <div class="grid cols-2">
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div class="panel tint">
+        <h3>Core entities</h3>
+        <p><b>URL mapping</b> (code, long URL, expiration) · <b>Creator</b> (API key) · <b>Click event</b></p>
+      </div>
+      <pre class="http"><span class="m">POST</span> /v1/urls
+Authorization: Bearer &lt;api_key&gt;
+
+{ "long_url": "https://…",
+  "custom_alias": "my-event",   <span class="muted">// optional</span>
+  "expires_at": "2027-01-01" }  <span class="muted">// optional</span>
+
+<span class="s">201 Created</span>  { "short_url": "short.ly/abc1234" }
+<span class="e">400</span> bad URL · <span class="e">409</span> alias taken · <span class="e">429</span> too many</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <pre class="http"><span class="m">GET</span> /{short_code}
+
+<span class="s">302 Found</span>
+Location: https://www.example.com/articles/…
+
+<span class="e">404</span> unknown code · <span class="e">410 Gone</span> expired</pre>
+      <div class="panel">
+        <h3>Small choices that score points</h3>
+        <ul>
+          <li><code>POST</code> with a noun path, because it creates a resource</li>
+          <li><code>409</code> for a taken alias: it conflicts with existing state</li>
+          <li><code>410</code> says "existed, now expired", more precise than 404</li>
+          <li>No <code>/v1/</code> on redirects: the short link is the product</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" id="s6">
+  <div class="eyebrow"><span>Step 3 · The classic follow-up</span><span class="num">06</span></div>
+  <h2>Why 302 and not 301?</h2>
+  <div class="grid cols-2">
+    <div class="panel">
+      <h3>301 Moved Permanently</h3>
+      <ol>
+        <li>First click: browser asks us, we answer 301.</li>
+        <li>Browser <b>caches</b> the redirect.</li>
+        <li>Every later click goes straight to the long URL. <b>We never see it.</b></li>
+      </ol>
+      <p style="color:var(--bad)">No click counts. And when the link expires, the browser keeps following it anyway.</p>
+    </div>
+    <div class="panel tint">
+      <h3>302 Found (temporary)</h3>
+      <ol>
+        <li>Every click comes to our server.</li>
+        <li>We count it, check expiration, then redirect.</li>
+        <li>The cost is more traffic, which our cache absorbs.</li>
+      </ol>
+      <p style="color:var(--ok)">Click counts work. Expiration works.</p>
+    </div>
+  </div>
+  <p class="say">"I'd use 302. A 301 gets cached by browsers, so we'd lose click counts, and expiration would stop working, because a browser that cached the redirect keeps following it."</p>
+</section>
+
+<!-- 7 -->
+<section class="slide" id="s7">
+  <div class="eyebrow"><span>Step 4 · High-level design</span><span class="num">07</span></div>
+  <h2>Split reads from writes</h2>
+  <div class="diagram">
+    <svg viewBox="0 0 900 410" role="img" aria-label="Architecture: client, load balancer, write service and redirect service, Redis counter, Redis cache, message queue, key-value store, analytics worker">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <!-- wires -->
+      <path class="wire" d="M120 210 H148" marker-end="url(#arr)"/>
+      <path class="wire" d="M270 200 L308 110" marker-end="url(#arr)"/>
+      <path class="wire" d="M270 220 L308 310" marker-end="url(#arr)"/>
+      <path class="wire" d="M480 95 L528 62" marker-end="url(#arr)"/>
+      <path class="wire" d="M480 118 L728 168" marker-end="url(#arr)"/>
+      <path class="wire" d="M480 296 L528 230" marker-end="url(#arr)"/>
+      <path class="wire dash" d="M480 314 H810 V212" marker-end="url(#arr)"/>
+      <path class="wire" d="M480 333 L528 358" marker-end="url(#arr)"/>
+      <path class="wire" d="M690 363 H728" marker-end="url(#arr)"/>
+      <text class="edge" x="276" y="150">POST /v1/urls</text>
+      <text class="edge" x="276" y="282">GET /{code}</text>
+      <text class="edge" x="560" y="140">conditional write</text>
+      <text class="edge" x="610" y="306">on cache miss</text>
+      <text class="edge" x="486" y="352">click</text>
+      <!-- boxes -->
+      <rect class="box" x="10" y="183" width="110" height="54" rx="8"/>
+      <text x="65" y="215" text-anchor="middle">Client</text>
+      <rect class="box" x="150" y="183" width="120" height="54" rx="8"/>
+      <text x="210" y="207" text-anchor="middle">L7 load</text>
+      <text x="210" y="226" text-anchor="middle">balancer</text>
+      <rect class="box hot" x="310" y="80" width="170" height="54" rx="8"/>
+      <text x="395" y="104" text-anchor="middle">Write service</text>
+      <text class="sub" x="395" y="122" text-anchor="middle">~1K QPS</text>
+      <rect class="box hot" x="310" y="286" width="170" height="54" rx="8"/>
+      <text x="395" y="310" text-anchor="middle">Redirect service</text>
+      <text class="sub" x="395" y="328" text-anchor="middle">~10K+ QPS</text>
+      <rect class="box" x="530" y="30" width="160" height="54" rx="8"/>
+      <text x="610" y="54" text-anchor="middle">Redis counter</text>
+      <text class="sub" x="610" y="72" text-anchor="middle">INCRBY 1000</text>
+      <rect class="box" x="530" y="183" width="160" height="54" rx="8"/>
+      <text x="610" y="207" text-anchor="middle">Redis cache</text>
+      <text class="sub" x="610" y="225" text-anchor="middle">LRU, TTL ≤ expiry</text>
+      <rect class="box" x="530" y="336" width="160" height="54" rx="8"/>
+      <text x="610" y="368" text-anchor="middle">Message queue</text>
+      <rect class="box store" x="730" y="150" width="160" height="60" rx="8"/>
+      <text x="810" y="176" text-anchor="middle">Key-value store</text>
+      <text class="sub" x="810" y="195" text-anchor="middle">key: short_code</text>
+      <rect class="box" x="730" y="336" width="160" height="54" rx="8"/>
+      <text x="810" y="368" text-anchor="middle">Analytics worker</text>
+    </svg>
+  </div>
+  <p class="muted">Reads outnumber writes 10 to 1 and need higher availability, so each side scales on its own. Every box runs more than one instance: no single point of failure.</p>
+</section>
+
+<!-- 8 -->
+<section class="slide" id="s8">
+  <div class="eyebrow"><span>Step 4 · Request flows</span><span class="num">08</span></div>
+  <h2>Walk through each requirement</h2>
+  <div class="grid cols-2">
+    <div class="panel">
+      <h3>Write flow</h3>
+      <ol>
+        <li><code>POST /v1/urls</code> reaches the write service by path (L7).</li>
+        <li>Validate the URL, check the rate limit.</li>
+        <li>Pick a code: the custom alias, or the next counter ID.</li>
+        <li><b>Conditional write</b>: insert only if the code is free.</li>
+        <li>Return <code>201</code>.</li>
+      </ol>
+    </div>
+    <div class="panel tint">
+      <h3>Redirect flow (cache-aside)</h3>
+      <ol>
+        <li>Look up the code in Redis.</li>
+        <li><b>Hit</b>: check <code>expires_at</code>, return <code>302</code>.</li>
+        <li><b>Miss</b>: read the database, fill the cache, redirect.</li>
+        <li>Unknown code: <code>404</code>, cached briefly to stop <b>cache penetration</b>. Expired: <code>410</code>.</li>
+        <li>Send a click event to the queue, <b>asynchronously</b>. A redirect never waits on analytics.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="s9">
+  <div class="eyebrow"><span>Step 4 · Data model</span><span class="num">09</span></div>
+  <h2>One table, one key lookup</h2>
+  <div class="grid cols-2">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>short_code</code></td><td>string(7), PK</td><td>Also holds aliases</td></tr>
+          <tr><td><code>long_url</code></td><td>string</td><td>Up to ~2 KB</td></tr>
+          <tr><td><code>created_at</code></td><td>timestamp</td><td></td></tr>
+          <tr><td><code>expires_at</code></td><td>timestamp, null</td><td>Optional</td></tr>
+          <tr><td><code>creator_id</code></td><td>string</td><td>For rate limits, abuse</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div class="panel tint">
+        <h3>Key-value store (DynamoDB)</h3>
+        <p>Insert a row, read it by <code>short_code</code>. No joins, no multi-row transactions. Storage reaches hundreds of TB, and a KV store shards and replicates for us. Postgres would work at first, then need manual sharding.</p>
+      </div>
+      <div class="panel">
+        <h3>Expiration in two parts</h3>
+        <p><b>Correctness</b>: check <code>expires_at</code> on every redirect. <b>Cleanup</b>: TTL feature or a background job, which may lag by days. Never rely on cleanup for correctness.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" id="s10">
+  <div class="eyebrow"><span>Step 5 · Deep dive</span><span class="num">10</span></div>
+  <h2>How do we generate the code?</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Option</th><th>How</th><th>Strength</th><th>Problem</th></tr></thead>
+      <tbody>
+        <tr><td>A. Hash and truncate</td><td>SHA-256 the URL, base62, keep 7 chars</td><td>No coordination</td><td>Truncation collides, needs a salted retry. Same URL gives the same code</td></tr>
+        <tr class="pick"><td><b>B. Counter + base62</b></td><td>Next integer, encoded in base62</td><td><b>Unique by construction</b>, no retries</td><td>Bottleneck, single point of failure, guessable</td></tr>
+        <tr><td>C. Random + conditional write</td><td>Random 7 chars, insert if free, retry</td><td>Unguessable, simple</td><td>Retries grow as the space fills</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede">Pick <b class="accent">B</b>, the standard answer in Hello Interview and Alex Xu. Then fix its three weaknesses yourself, before the interviewer asks.</p>
+  <p class="say">"I'd use a counter, since it's unique by construction. It has three weak spots: it's a bottleneck, a single point of failure, and guessable. Let me fix each one."</p>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="s11">
+  <div class="eyebrow"><span>Deep dive · Fix 1 of 3</span><span class="num">11</span></div>
+  <h2>Bottleneck: hand out IDs in batches</h2>
+  <div class="grid cols-2">
+    <div class="ranges" aria-label="Each write server reserves its own range of 1,000 IDs">
+      <div class="range"><span>server 1</span><span class="seg used">1,000 to 1,999 &nbsp;(using 1,412)</span></div>
+      <div class="range"><span>server 2</span><span class="seg used">2,000 to 2,999 &nbsp;(using 2,077)</span></div>
+      <div class="range"><span>server 3</span><span class="seg">3,000 to 3,999 &nbsp;(just reserved)</span></div>
+      <div class="range"><span>Redis</span><span class="seg">counter = 3,999</span></div>
+    </div>
+    <div class="panel tint">
+      <h3>How it works</h3>
+      <p>Each write server calls <code>INCRBY counter 1000</code> once, gets a private range, and hands out IDs from memory. It returns to Redis only when the range runs out.</p>
+      <p><b>1,000 writes/s ÷ 1,000 per batch ≈ 1 Redis call per second.</b></p>
+      <p class="muted">If a server crashes, the rest of its range is never used. That's fine: we need 365 billion codes out of 3.5 trillion.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" id="s12">
+  <div class="eyebrow"><span>Deep dive · Fixes 2 and 3</span><span class="num">12</span></div>
+  <h2>Failover and guessability</h2>
+  <div class="grid cols-2">
+    <div class="panel">
+      <h3>Single point of failure</h3>
+      <p>Run Redis with a replica and automatic failover. But replication is <b>asynchronous</b>: the new primary may have missed the last <code>INCRBY</code> and hand out the <b>same range twice</b>.</p>
+      <ul>
+        <li>After failover, <b>jump the counter forward</b> a few million.</li>
+        <li>Keep the <b>conditional write</b> as the last safety net.</li>
+      </ul>
+      <p class="rule" style="margin-top:auto">Skipping IDs is harmless.<br>Reusing them is not.</p>
+    </div>
+    <div class="panel tint">
+      <h3>Guessable codes</h3>
+      <p>Pass the counter through a <b>reversible transformation</b> with a secret key before encoding (here: multiply by a secret number, mod 62<sup>7</sup>). One-to-one, so codes stay unique.</p>
+      <div class="codes">
+        <span class="h">counter</span><span class="h">plain base62</span><span class="h">transformed</span>
+        <span>1000</span><span>00000g8</span><span class="accent">26Ess0E</span>
+        <span>1001</span><span>00000g9</span><span class="accent">EqngklJ</span>
+        <span>1002</span><span>00000ga</span><span class="accent">gK64cGO</span>
+      </div>
+      <p class="muted">Neighbors no longer look like neighbors, so nobody can walk the list.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" id="s13">
+  <div class="eyebrow"><span>Putting it together</span><span class="num">13</span></div>
+  <h2>Three requests, end to end</h2>
+  <p class="lede">Two write servers. The Redis counter starts at <code>999</code>, and neither server holds any IDs yet.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Request</th><th>Server</th><th>Redis call</th><th>ID</th><th>Plain base62</th><th>Returned code</th></tr></thead>
+      <tbody>
+        <tr><td>Alice: blog post</td><td>A</td><td><code>INCRBY 1000</code> → 1999<br><span class="muted">A owns 1000 to 1999</span></td><td>1000</td><td class="muted"><code>00000g8</code></td><td><code class="accent">short.ly/26Ess0E</code></td></tr>
+        <tr><td>Bob: product page</td><td>A</td><td><b>none</b><br><span class="muted">uses its own batch</span></td><td>1001</td><td class="muted"><code>00000g9</code></td><td><code class="accent">short.ly/EqngklJ</code></td></tr>
+        <tr><td>Carol: event signup</td><td>B</td><td><code>INCRBY 1000</code> → 2999<br><span class="muted">B owns 2000 to 2999</span></td><td>2000</td><td class="muted"><code>00000wg</code></td><td><code class="accent">short.ly/4diUU1i</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid cols-3" style="flex:0">
+    <div class="panel tint"><h3>Each request</h3><p>Take the next ID, transform it, encode in base62, conditional write, return <code>201</code>.</p></div>
+    <div class="panel"><h3>No collisions</h3><p>A and B hold ranges that never overlap, so they never hand out the same ID.</p></div>
+    <div class="panel warm"><h3>2 Redis calls for 3 requests</h3><p>Bob's request never touched Redis. That is what batching saves.</p></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" id="s14">
+  <div class="eyebrow"><span>Estimates that drove decisions</span><span class="num">14</span></div>
+  <h2>Why seven characters?</h2>
+  <p class="lede">100M URLs a day × 365 × 10 years ≈ <b>365 billion</b> codes needed. Base62 means a-z, A-Z, 0-9.</p>
+  <div class="bars" aria-label="Bars drawn to one linear scale, where 62 to the 7th equals the full width">
+    <div class="bar-row"><span>62<sup>6</sup> (6 chars)</span><div class="bar-track"><div class="bar-fill" style="width:1.6%"></div></div><span class="bar-val">56.8 billion</span></div>
+    <div class="bar-row"><span><b>Needed</b> (10 years)</span><div class="bar-track"><div class="bar-fill need" style="width:10.4%"></div></div><span class="bar-val">365 billion</span></div>
+    <div class="bar-row"><span>62<sup>7</sup> (7 chars)</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">3.52 trillion</span></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Math</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr><td>Counter load</td><td>~1,000 writes/s, batches of 1,000</td><td>One Redis counter is enough</td></tr>
+        <tr><td>Read load</td><td>~10,000 redirects/s, more at peak</td><td>Cache is the main lever</td></tr>
+        <tr><td>Storage</td><td>500 B × 365B ≈ 180 TB (550 TB with 3 replicas)</td><td>Needs sharding, so a KV store</td></tr>
+        <tr><td>Cache</td><td>20% of daily reads ≈ 100 GB</td><td>Fits in a few Redis nodes</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" id="s15">
+  <div class="eyebrow"><span>Wrap-up · Trade-offs</span><span class="num">15</span></div>
+  <h2>Every choice, and what we gave up</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Decision</th><th>Chosen</th><th>Alternative</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Code generation</td><td>Counter + batching + transform</td><td>Random + conditional write</td><td>Unique by construction, no retries</td></tr>
+        <tr><td>Redirect</td><td>302</td><td>301</td><td>301 breaks click counts and expiration</td></tr>
+        <tr><td>Database</td><td>Key-value store</td><td>Postgres, shard later</td><td>Pure key lookups, hundreds of TB</td></tr>
+        <tr><td>Cache</td><td>Cache-aside, LRU, TTL ≤ expiry</td><td>Write-through</td><td>Hot links stay; expired ones don't linger</td></tr>
+        <tr><td>Services</td><td>Separate write and redirect</td><td>One service</td><td>10:1 traffic gap, different availability needs</td></tr>
+        <tr><td>Analytics</td><td>Async via queue</td><td>Write on every click</td><td>Redirects never wait on analytics</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide" id="s16">
+  <div class="eyebrow"><span>Wrap-up · Follow-up questions</span><span class="num">16</span></div>
+  <h2>What the interviewer asks next</h2>
+  <div class="grid cols-2">
+    <div class="panel">
+      <h3>"A link goes viral at 100× traffic."</h3>
+      <p>One hot key hammers one Redis node. Add a small in-process cache on each redirect server, serve redirects from a CDN or edge, and use request coalescing so an expiring entry doesn't cause a cache stampede.</p>
+    </div>
+    <div class="panel">
+      <h3>"What about links to malware?"</h3>
+      <p>Check new URLs against a blocklist such as Google Safe Browsing, rate limit per API key, and let us disable a code: delete it from the cache and purge the CDN.</p>
+    </div>
+    <div class="panel">
+      <h3>"Users want to edit the destination."</h3>
+      <p>Update the database, delete the cache key, purge the CDN, in that order. Database first, then invalidate.</p>
+    </div>
+    <div class="panel">
+      <h3>"The Redis counter fails."</h3>
+      <p>Fail over to the replica, jump the counter forward, and let the conditional write reject any duplicate. Servers keep serving from their current batch meanwhile.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="slide" id="s17">
+  <div class="eyebrow"><span>Takeaways</span><span class="num">17</span></div>
+  <h2>Five ideas that transfer to other problems</h2>
+  <div class="grid cols-2">
+    <ol style="gap:12px">
+      <li><b>Requirements decide the design.</b> "Hard to guess" ruled out plain counters. "Expiration" ruled out 301.</li>
+      <li><b>Read-heavy means cache first.</b> Split reads from writes so each scales alone.</li>
+      <li><b>Pick by access pattern.</b> One key lookup, hundreds of TB: a key-value store.</li>
+      <li><b>Name your solution's weak spots, then fix them.</b> That is what a deep dive is.</li>
+      <li><b>Only do math that changes a decision</b>, and say what it decided.</li>
+    </ol>
+    <div class="panel warm">
+      <h3>Practice it</h3>
+      <p>Explain slides 10 to 13 out loud in under five minutes, without looking. Then try the next warm-up: <b>Pastebin</b>, the same shape with large text bodies instead of URLs.</p>
+      <p class="muted" style="margin-top:auto">Sources: Hello Interview, "Design a URL Shortener Like Bit.ly"; Alex Xu, <i>System Design Interview</i> Vol. 1, ch. 8.</p>
+    </div>
+  </div>
+</section>
+
+<p class="hint">Use ← → or the buttons to move between slides.</p>
+</main>
+
+<nav class="nav" aria-label="Slide navigation">
+  <button type="button" id="prev" aria-label="Previous slide">←</button>
+  <span class="count" id="count" aria-live="polite">1 / 17</span>
+  <button type="button" id="next" aria-label="Next slide">→</button>
+</nav>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var count = document.getElementById('count');
+  var current = 0;
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides[current].scrollIntoView({ block: 'start' });
+  }
+  function label() { count.textContent = (current + 1) + ' / ' + slides.length; }
+  document.getElementById('prev').addEventListener('click', function () { show(current - 1); });
+  document.getElementById('next').addEventListener('click', function () { show(current + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(current - 1); }
+  });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { current = slides.indexOf(en.target); label(); }
+      });
+    }, { threshold: 0.55 });
+    slides.forEach(function (s) { io.observe(s); });
+  }
+  label();
+})();
+</script>
+</body>
+</html>
