@@ -3,7 +3,7 @@
 Worked solutions to classic design questions. Each write-up follows [`../templates/problem-template.md`](../templates/problem-template.md). Check a box once the problem has a full write-up.
 
 ## Warm-up
-- [ ] URL shortener
+- [x] [URL shortener](url-shortener.md)
 - [ ] Pastebin
 - [ ] Rate limiter
 - [ ] Unique ID generator

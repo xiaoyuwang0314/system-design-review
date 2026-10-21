@@ -91,10 +91,10 @@ Read path with cache-aside:
 
 Choices:
 - **LRU**: links are hottest right after they are shared and cool down over time, so recency predicts the next click well.
-- **Long TTL** (a day or more): the mapping almost never changes, so cached values rarely go stale. The TTL is mostly a safety net, and LRU handles memory. If the product lets users edit the destination, delete the cache key on edit.
+- **Long TTL, but never past the link's expiration**: the mapping almost never changes, so cached values rarely go stale, and a TTL of a day or more is fine. Cap it at the link's `expires_at`, so an expired link does not linger in the cache (Hello Interview makes the same point). Also check `expires_at` on every cache hit. If the product lets users edit the destination, delete the cache key on edit.
 - **Click analytics**: do not write to the DB on every click, which would turn every read into a write. Send click events to a message queue and process them in batches.
 
-> "On a redirect, I check Redis first. On a hit, I return a 302 with the long URL. On a miss, I look it up in the database by short code, write it back to the cache, then redirect. If it doesn't exist, I return 404 and cache that too, with a short TTL, to avoid cache penetration. I'd use LRU, because links are hottest right after they're shared and cool down over time. And since the mapping almost never changes, the TTL can be long. It's mostly a safety net."
+> "On a redirect, I check Redis first. On a hit, I return a 302 with the long URL. On a miss, I look it up in the database by short code, write it back to the cache, then redirect. If it doesn't exist, I return 404 and cache that too, with a short TTL, to avoid cache penetration. I'd use LRU, because links are hottest right after they're shared and cool down over time. And since the mapping almost never changes, the TTL can be long, as long as it never goes past the link's expiration time."
 
 ## Follow-up questions
 
