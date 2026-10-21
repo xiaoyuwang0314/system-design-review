@@ -27,6 +27,19 @@ Core concepts that show up across most system design interviews. One file per to
 - [ ] [Caching](caching.md) (strategies, eviction, invalidation, cache stampede)
 - [ ] Blob and object storage
 
+## Patterns
+- [ ] Scaling reads
+- [ ] Scaling writes
+- [ ] Realtime updates
+
+## Key Technologies
+- [ ] Redis
+- [ ] Kafka
+- [ ] Postgres
+- [ ] DynamoDB
+- [ ] Cassandra
+- [ ] Elasticsearch
+
 ## Distributed Systems
 - [ ] Message queues and event streaming (Kafka, SQS, delivery semantics)
 - [ ] Consensus (Raft, Paxos, leader election)

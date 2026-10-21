@@ -4,7 +4,14 @@
 
 Estimation is a tool for making design decisions. The point is to answer questions like "does the data fit on one machine?", "do I need a cache?", or "how many servers?". The exact numbers do not matter, the order of magnitude does.
 
-In an interview, spend two to three minutes on it, then state what the numbers imply for the design.
+### When to estimate
+
+Following Hello Interview, do the math **only when it drives a decision**:
+- Put scale targets (users, requests per day, data size) in the non-functional requirements.
+- Calculate inside the design at the moment a number changes a choice: how long a short code must be, whether data fits on one machine, how many connection servers are needed.
+- If the interviewer asks for upfront estimates (Alex Xu's style), do them in two to three minutes.
+
+Either way, always state what the numbers imply for the design.
 
 ## Numbers to remember
 

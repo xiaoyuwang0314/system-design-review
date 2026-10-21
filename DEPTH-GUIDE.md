@@ -44,10 +44,12 @@ If not, stop. Put the topic in the **Parked** section of the write-up and move o
 
 I am preparing for new grad interviews in general, and I target the mid-level bar as a safety margin. See [`research/ng-interview-landscape-2026.md`](research/ng-interview-landscape-2026.md) for the reasoning.
 
+The bar follows Hello Interview's wording: every level must complete a full design that satisfies the requirements, and a mid-level candidate "covers the basics well" without great depth. In deep dives, it is fine if the interviewer guides. See [`research/resource-alignment-2026.md`](research/resource-alignment-2026.md).
+
 | | What that means for each write-up |
 | --- | --- |
-| Requirements | Clarify functional and non-functional requirements before drawing anything |
-| Estimation | Quick and rough, a few lines. NG interviews rarely weigh it heavily |
+| Requirements | Clarify functional and non-functional requirements before drawing anything. Put scale targets in the non-functional requirements |
+| Estimation | Only where it drives a decision (for example, code length or whether to shard). Skip upfront math unless the interviewer asks for it |
 | Design | Cover both the read path and the write path, plus basic failure handling |
 | Deep dives | **One** component at L2 per problem. A second one only if it is clearly tied to the core challenge |
 | Trade-offs | Justify every main choice, and name at least one alternative |

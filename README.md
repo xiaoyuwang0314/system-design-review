@@ -9,6 +9,13 @@ This is a study log, not an authoritative reference. Notes may be incomplete or 
 - [`ROADMAP.md`](ROADMAP.md): phases, exit criteria, and what to study next
 - [`DEPTH-GUIDE.md`](DEPTH-GUIDE.md): how deep to go on each component, and when to stop
 - [`research/ng-interview-landscape-2026.md`](research/ng-interview-landscape-2026.md): what new grad interview loops looked like from Oct 2025 to Oct 2026, and why this repo has its current scope
+- [`research/resource-alignment-2026.md`](research/resource-alignment-2026.md): how this repo lines up with Hello Interview and Alex Xu's book
+
+## Main resources
+
+- **Hello Interview**: primary framework and level bar
+- **Alex Xu, *System Design Interview* Vol. 1**: problem list and estimation method
+- ***Designing Data-Intensive Applications***: deep reference
 
 ## Scope
 
@@ -18,7 +25,7 @@ This repo covers distributed system design and component / API design, targeting
 
 | Folder | What goes there |
 | --- | --- |
-| [`fundamentals/`](fundamentals/) | Core building blocks: scalability, caching, databases, replication, sharding, consistency, messaging, and so on |
+| [`fundamentals/`](fundamentals/) | Core building blocks, patterns, and key technologies: scalability, caching, databases, replication, sharding, consistency, messaging, and so on |
 | [`problems/`](problems/) | Worked solutions to classic design questions and component / API design problems, one file per problem |
 | [`research/`](research/) | Research on interview formats that informs the scope and depth of these notes |
 | [`mock-interviews/`](mock-interviews/) | Logs of practice sessions: the prompt, what I did, feedback, and what to fix next time |

@@ -1,14 +1,16 @@
 # Problem Name
 
+The steps follow the Hello Interview delivery framework. See [`../research/resource-alignment-2026.md`](../research/resource-alignment-2026.md).
+
 ## Core Challenge
 One sentence: what makes this problem hard? Deep dives must serve this. See [`../DEPTH-GUIDE.md`](../DEPTH-GUIDE.md).
 
-## 1. Requirements
+## 1. Requirements (about 5 min)
 ### Functional
 -
 
 ### Non-functional
-- Scale:
+- Scale targets (users, requests, data size):
 - Latency:
 - Availability vs. consistency:
 - Durability:
@@ -16,35 +18,33 @@ One sentence: what makes this problem hard? Deep dives must serve this. See [`..
 ### Out of scope
 -
 
-## 2. Capacity Estimation
-- Users (DAU / MAU):
-- Read QPS / write QPS (average and peak):
-- Storage per year:
-- Bandwidth:
+## 2. Core Entities (about 2 min)
+The main nouns of the system, with no fields yet.
+-
 
-## 3. API Design
+## 3. API (about 5 min)
 ```
 ```
 
-## 4. Data Model
-- Entities and key fields:
-- Database choice and why:
+## 4. High-Level Design (10 to 15 min)
+Diagram and walkthrough of each functional requirement's request flow. Add schema details (key fields, database choice and why) as the design needs them.
 
-## 5. High-Level Design
-Diagram and walkthrough of the main request flows.
-
-## 6. Deep Dives
+## 5. Deep Dives (about 10 min)
 ### Depth plan
 | Component | Level (L1 / L2 / L3) | Reason |
 | --- | --- | --- |
 
 Pick one component tied to the core challenge and take it to L2 (how it works, failure handling, follow-ups). Add a second only if it is clearly part of the core challenge.
 
-## 7. Trade-offs and Alternatives
+### Estimates used
+Back-of-the-envelope math, done only where it drove a decision.
+-
+
+## 6. Trade-offs and Alternatives
 | Decision | Chosen | Alternative | Why |
 | --- | --- | --- | --- |
 
-## 8. Follow-up Questions
+## 7. Follow-up Questions
 Likely interviewer follow-ups and short answers.
 
 ## Parked
